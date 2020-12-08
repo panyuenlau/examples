@@ -5,7 +5,7 @@ spec:
   selector:
     matchLabels:
       networkservicemesh.io/app: "ucnf-client"
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:

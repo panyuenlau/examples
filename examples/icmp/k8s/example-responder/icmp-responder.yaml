@@ -1,0 +1,13 @@
+---
+apiVersion: networkservicemesh.io/v1alpha1
+kind: NetworkService
+metadata:
+  name: icmp-responder # neet to match networkservicemesh.io/app
+spec:
+  payload: IP
+  matches:
+    - match:
+      route:
+        - destination:
+          destinationSelector:
+            app: ucnf-endpoint-test # this needs to match the config.yaml.labels.app in the endpoint yaml
