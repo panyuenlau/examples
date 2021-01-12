@@ -4,12 +4,12 @@ kind: Deployment
 spec:
   selector:
     matchLabels:
-      networkservicemesh.io/app: "icmp-client"
+      networkservicemesh.io/app: "ucnf-client"
   replicas: 1
   template:
     metadata:
       labels:
-        networkservicemesh.io/app: "icmp-client"
+        networkservicemesh.io/app: "ucnf-client"
     spec:
       hostPID: true
       containers:
@@ -36,9 +36,7 @@ spec:
             name: universal-cnf-client
 metadata:
   name: ucnf-client
-  annotations:
-    ns.networkservicemesh.io: ucnf-nse-pass-through-nse?app=icmp # need to match network service name to find the network service
-                                                      # the "?app=icmp" is to attach a label, more info: https://github.com/networkservicemesh/networkservicemesh/blob/dcd4809f9128a3d4074d9caae8f0c5dca28a000c/docs/spec/admission.md
+  namespace: default
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -51,7 +49,7 @@ data:
           name: "vppctl"
           args: ["show", "version"]
       - client:
-          name: "ucnf-nse-ucnf-nse-service"
+          name: "packet-filtering"
           ifname: "client0"
           labels:
-            app: "icmp-client"
+            app: "ucnf-client"

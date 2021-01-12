@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  selector:
+    matchLabels:
+      networkservicemesh.io/app: "gateway"
+      networkservicemesh.io/impl: "packet-filtering"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        networkservicemesh.io/app: "gateway"
+        networkservicemesh.io/impl: "packet-filtering"
+    spec:
+      containers:
+        - name: universal-cnf-endpoint
+          image: docker.io/darrenlau1227/universal-cnf-vppagent:master
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ENDPOINT_NETWORK_SERVICE
+              value: "pass-through-nse"
+            - name: ENDPOINT_LABELS
+              value: "app=uconf-nse-pass-through-nse"
+            - name: TRACER_ENABLED
+              value: "true"
+            - name: JAEGER_SERVICE_HOST
+              value: jaeger.nsm-system
+            - name: JAEGER_SERVICE_PORT_JAEGER
+              value: "6832"
+            - name: JAEGER_AGENT_HOST
+              value: jaeger.nsm-system
+            - name: JAEGER_AGENT_PORT
+              value: "6832"
+            - name: NSREGISTRY_ADDR
+              value: "nsmgr.nsm-system"
+            - name: NSREGISTRY_PORT
+              value: "5000"
+            - name: INSECURE
+              value: "true"
+            - name: METRICS_PORT
+              value: "2112"
+          resources:
+            limits:
+              networkservicemesh.io/socket: 1
+          volumeMounts:
+            - mountPath: /etc/universal-cnf/config.yaml
+              subPath: config.yaml
+              name: universal-cnf-config-volume
+      volumes:
+        - name: universal-cnf-config-volume
+          configMap:
+            name: universal-cnf-gateway
+metadata:
+  name: gateway
+  namespace: default
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: universal-cnf-gateway
+data:
+  config.yaml: |
+    endpoints:
+    - name: "packet-filtering"
+      labels:
+        app: "gateway"
+      nseControl:
+        name: "gateway"
+        address: vl3-service.wcm-cisco.com
+        connectivityDomain: "gateway-nse-connectivity-domain"
+      vl3:
+        ipam:
+          defaultPrefixPool: "10.60.2.0/24"
+          routes: ["10.60.1.0/24"]
+        ifName: "endpoint0"
